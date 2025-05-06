@@ -27,7 +27,7 @@ pip install -r requirements.txt
 ```bash
 python scripts/gpu_test.py
 ```
-# (replace gpu_test.py with the name of your main script)
+## (replace gpu_test.py with the name of your main script)
 
 ## 📄 Licence and author
 ### Author: Manual QA team
