@@ -1,0 +1,7 @@
+fio --filename=/dev/nvme0n1 --direct=1 --bs=4k --ioengine=libaio --iodepth=32 --size=1200G --runtime=60 --numjobs=4 --time_based --group_reporting --name=benchmark_rr_4k_qd32_j4 --readwrite=randread
+fio --filename=/dev/nvme0n1 --direct=1 --bs=4k --ioengine=libaio --iodepth=32 --size=1200G --runtime=60 --numjobs=4 --time_based --group_reporting --name=benchmark_rw_4k_qd32_j4 --readwrite=randwrite
+-----
+fio --filename=/dev/nvme0n1 --direct=1 --bs=1M --ioengine=libaio --iodepth=32 --size=1200G --runtime=60 --numjobs=4 --time_based --group_reporting --name=benchmark_sr_1M_qd32_j4 --readwrite=read
+fio --filename=/dev/nvme0n1 --direct=1 --bs=1M --ioengine=libaio --iodepth=32 --size=1200G --runtime=60 --numjobs=4 --time_based --group_reporting --name=benchmark_sw_1M_qd32_j4 --readwrite=write
+-----
+fio --filename=/dev/nvme0n1 --direct=1 --bs=64k --ioengine=libaio --iodepth=64 --size=1200G --runtime=120 --numjobs=32 --time_based --group_reporting --name=benchmark_wg_test --readwrite=randrw --rwmixread=30

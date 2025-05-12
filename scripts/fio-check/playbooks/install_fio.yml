@@ -1,0 +1,31 @@
+---
+- name: Установка fio на серверы
+  hosts: debian  # или укажите конкретную группу серверов
+  become: true  # использовать sudo
+  
+  tasks:
+    - name: Обновление кэша пакетов (для Debian/Ubuntu)
+      apt:
+        update_cache: yes
+      when: ansible_os_family == "Debian"
+      
+    - name: Установка fio (Debian/Ubuntu)
+      apt:
+        name: fio
+        state: present
+      when: ansible_os_family == "Debian"
+    
+    - name: Установка fio (RedHat/CentOS)
+      yum:
+        name: fio
+        state: present
+      when: ansible_os_family == "RedHat"
+    
+    - name: Проверка установки fio
+      command: fio --version
+      register: fio_version
+      changed_when: false
+      
+    - name: Вывод версии fio
+      debug:
+        msg: "Установлена версия fio: {{ fio_version.stdout }}"

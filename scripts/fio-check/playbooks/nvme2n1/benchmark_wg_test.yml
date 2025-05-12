@@ -1,0 +1,84 @@
+---
+- name: Запуск fio теста {{ fio_test_name }}
+  hosts: all
+  become: true
+
+  vars:
+    fio_test_name: "benchmark_wg_test"
+    fio_test_directory: "/dev/nvme2n1"
+    fio_output_dir: "/tmp/fio_results"
+    fio_readwrite: "randrw"
+    fio_runtime: 120
+    fio_size: "1200G"
+    fio_bs: "64k"
+    fio_iodepth: 64
+    fio_numjobs: 32
+
+  pre_tasks:
+    - name: Получить текущее время
+      command: date +%Y%m%d_%H%M%S
+      register: time_output
+      delegate_to: localhost
+      run_once: true
+      become: false
+
+    - name: Установить переменную времени
+      set_fact:
+        current_time: "{{ time_output.stdout }}"
+
+  tasks:
+    - name: Проверка наличия fio на сервере
+      command: which fio
+      register: fio_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Установка fio при необходимости
+      package:
+        name: fio
+        state: present
+      when: fio_check.rc != 0
+
+    - name: Создание директории для результатов
+      file:
+        path: "{{ fio_output_dir }}"
+        state: directory
+        mode: "0755"
+
+    - name: Запуск тестов fio
+      shell: >
+        fio --filename={{ fio_test_directory }}
+        --direct=1
+        --bs={{ fio_bs }}
+        --ioengine=libaio
+        --iodepth={{ fio_iodepth }}
+        --size={{ fio_size }}
+        --runtime={{ fio_runtime }}
+        --numjobs={{ fio_numjobs }}
+        --time_based
+        --group_reporting
+        --name={{ fio_test_name }}
+        --readwrite={{ fio_readwrite }}
+        --rwmixread=30
+        --output={{ fio_output_dir }}/fio_results_{{ inventory_hostname }}_{{ current_time }}.txt
+      async: 1800
+      poll: 0
+      register: fio_async_result
+
+    - name: Проверка статуса выполнения fio
+      async_status:
+        jid: "{{ fio_async_result.ansible_job_id }}"
+      register: job_result
+      until: job_result.finished
+      retries: 180
+      delay: 10
+
+    - name: Получение результатов тестов
+      fetch:
+        src: "{{ fio_output_dir }}/fio_results_{{ inventory_hostname }}_{{ current_time }}.txt"
+        dest: "../fio_results/{{ inventory_hostname }}/"
+        flat: yes
+
+    - name: Вывод пути к результатам
+      debug:
+        msg: "Результаты теста сохранены в ../fio_results/{{ inventory_hostname }}/fio_results_{{ inventory_hostname }}_{{ current_time }}.txt"

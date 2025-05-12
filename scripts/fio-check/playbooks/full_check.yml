@@ -1,0 +1,36 @@
+---
+- import_playbook: nvme0n1/benchmark_rr_4k_qd32_j4.yml
+- import_playbook: nvme0n1/benchmark_sr_1M_qd32_j4.yml
+- import_playbook: nvme0n1/benchmark_rw_4k_qd32_j4.yml
+- import_playbook: nvme0n1/benchmark_sw_1M_qd32_j4.yml
+- import_playbook: nvme0n1/benchmark_wg_test.yml
+
+- import_playbook: nvme1n1/benchmark_rr_4k_qd32_j4.yml
+- import_playbook: nvme1n1/benchmark_sr_1M_qd32_j4.yml
+- import_playbook: nvme1n1/benchmark_rw_4k_qd32_j4.yml
+- import_playbook: nvme1n1/benchmark_sw_1M_qd32_j4.yml
+- import_playbook: nvme1n1/benchmark_wg_test.yml
+
+- import_playbook: nvme2n1/benchmark_rr_4k_qd32_j4.yml
+- import_playbook: nvme2n1/benchmark_sr_1M_qd32_j4.yml
+- import_playbook: nvme2n1/benchmark_rw_4k_qd32_j4.yml
+- import_playbook: nvme2n1/benchmark_sw_1M_qd32_j4.yml
+- import_playbook: nvme2n1/benchmark_wg_test.yml
+
+- import_playbook: nvme3n1/benchmark_rr_4k_qd32_j4.yml
+- import_playbook: nvme3n1/benchmark_sr_1M_qd32_j4.yml
+- import_playbook: nvme3n1/benchmark_rw_4k_qd32_j4.yml
+- import_playbook: nvme3n1/benchmark_sw_1M_qd32_j4.yml
+- import_playbook: nvme3n1/benchmark_wg_test.yml
+
+- import_playbook: nvme5n1/benchmark_rr_4k_qd32_j4.yml
+- import_playbook: nvme5n1/benchmark_sr_1M_qd32_j4.yml
+- import_playbook: nvme5n1/benchmark_rw_4k_qd32_j4.yml
+- import_playbook: nvme5n1/benchmark_sw_1M_qd32_j4.yml
+- import_playbook: nvme5n1/benchmark_wg_test.yml
+
+- import_playbook: nvme6n1/benchmark_rr_4k_qd32_j4.yml
+- import_playbook: nvme6n1/benchmark_sr_1M_qd32_j4.yml
+- import_playbook: nvme6n1/benchmark_rw_4k_qd32_j4.yml
+- import_playbook: nvme6n1/benchmark_sw_1M_qd32_j4.yml
+- import_playbook: nvme6n1/benchmark_wg_test.yml
