@@ -8,7 +8,7 @@ from pathlib import Path
 # Настройка логирования с явным указанием кодировки
 logging.basicConfig(
     level=logging.INFO,
-    format='%(asctime)s - %(levelname)s - %(message)s',
+    format='%(asctime)s - %(levelname)s - %(messagpyre)s',
     handlers=[
         logging.FileHandler("ssh_deploy_key.log", encoding='utf-8'),
         logging.StreamHandler(sys.stdout)
@@ -17,7 +17,7 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 # Публичный ключ, который нужно добавить
-PUBLIC_KEY = "ecdsa-sha2-nistp521 AAAAE2VjZHNhLXNoYTItbmlzdHA1MjEAAAAIbmlzdHA1MjEAAACFBAFvGdA7AibL8lEFIxHkX8ZmcKi8vYc1e/yaaddkDtz3kkWUmbHjImsJg8pr26+LVjAvyZvUXuXLMLFTQ+2atyzdLQCT5RkqWqn6mMAfRMdyrxnkuI+8eg8esiaCOBXDdlKM8AQ/0kh0f/Rn0hRGIhlS1efpwy8Ua8U+8ANeiH5NffXwDQ== christofstuehrmann@MacBook-Pro-von-Christof.local"
+PUBLIC_KEY = "ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAILlcS96HEfJDXFrkvFEWDqx1tbE6COfzReSyPOJl3uMR oleksandr.mykhalskyi@gcore.lu"
 
 def add_ssh_key_to_server(ip, private_key_path, username='ubuntu'):
     """
