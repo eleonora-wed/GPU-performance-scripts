@@ -14,8 +14,8 @@ Test cases - https://testrail.ad.gcore.lu/index.php?/suites/view/3&group_by=case
 
 ### 1. Clone a repository
 ```bash
-git clone https://gitlab-ed7.cloud.gc.onl/cloudapi/qa/team-qa.git
-cd team-qa
+git https://github.com/eleonora-wed/GPU-performance-scripts.git
+cd GPU-performance-scripts
 ```
 
 ### 2. Install dependencies

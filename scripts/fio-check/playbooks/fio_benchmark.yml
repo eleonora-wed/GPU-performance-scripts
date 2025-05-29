@@ -1,0 +1,117 @@
+---
+- name: Загрузить переменные из файла конфигурации
+  include_vars:
+    file: "{{ config_file }}"
+    name: config
+
+- name: Проверка дисков и запуск тестов
+  block:
+    - name: Получить строку с информацией о диске {{ disk }}
+      shell: lsblk -o NAME,SIZE | grep "^{{ disk }}"
+      register: fio_disk_info
+      changed_when: false
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+
+    - name: Инициализировать словарь fio_device_is_expected
+      set_fact:
+        fio_device_is_expected: {}
+
+    - name: Проверить, содержит ли диск {{ disk }} размер {{ fio_expected_size }}
+      set_fact:
+        fio_device_is_expected: "{{ fio_device_is_expected | combine({ disk: (fio_expected_size in fio_disk_info.results[loop_index].stdout) }) }}"
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+        index_var: loop_index
+
+    - name: Отладка fio_device_is_expected
+      debug:
+        var: fio_device_is_expected
+
+    - name: Пропустить тест, если размер диска {{ disk }} не соответствует
+      debug:
+        msg: "Размер диска {{ disk }} не равен {{ fio_expected_size }}, тест будет пропущен."
+      when: not fio_device_is_expected[disk]
+      failed_when: not fio_device_is_expected[disk]
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+
+    - name: Создание директории для результатов на сервере
+      file:
+        path: "{{ fio_output_dir }}"
+        state: directory
+        mode: "0755"
+      when: fio_device_is_expected[disk]
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+
+    - name: Запуск тестов fio для диска {{ disk }}
+      shell: >
+        fio --filename=/dev/{{ disk }}
+        --direct=1
+        --bs={{ config.fio_bs | default('4k') }}
+        --ioengine=libaio
+        --iodepth={{ config.fio_iodepth | default(32) }}
+        --size={{ fio_size | default('100M') }}
+        --runtime={{ config.fio_runtime | default(60) }}
+        --numjobs={{ config.fio_numjobs | default(4) }}
+        --time_based
+        --group_reporting
+        --name={{ config.fio_test_name | default('benchmark_default') }}_{{ disk }}
+        --readwrite={{ config.fio_readwrite | default('randread') }}
+        --output-format=json
+        --output={{ fio_output_dir }}/fio_results_{{ inventory_hostname }}_{{ current_time }}_{{ config.fio_test_name | default('benchmark_default') }}_{{ disk }}.json
+      async: 1800
+      poll: 0
+      register: fio_async_result
+      when: fio_device_is_expected[disk]
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+
+    - name: Проверка статуса выполнения fio теста {{ fio_test_name }}
+      async_status:
+        jid: "{{ fio_async_result.results[loop_index].ansible_job_id }}"
+      register: async_job_result
+      until: async_job_result.finished
+      retries: 180
+      delay: 10
+      when: fio_device_is_expected[disk]
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+        index_var: loop_index
+
+    - name: Создание локальных папкок для результатов тестов
+      file:
+        path: "../fio_results/{{ inventory_hostname }}/{{ disk }}"
+        state: directory
+        mode: "0755"
+      delegate_to: localhost
+      become: false
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+      when: fio_device_is_expected[disk]
+
+    - name: Получение результатов тестов для дисков {{ fio_test_disks }}
+      fetch:
+        src: "{{ fio_output_dir }}/fio_results_{{ inventory_hostname }}_{{ current_time }}_{{ config.fio_test_name | default('benchmark_default') }}_{{ disk }}.json"
+        dest: "../fio_results/{{ inventory_hostname }}/{{ disk }}/"
+        flat: yes
+      when: fio_device_is_expected[disk]
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk
+
+    - name: Сохрвнение результатов тестов на локальный хост
+      debug:
+        msg: "Результаты для {{ disk }} сохранены в ../fio_results/{{ inventory_hostname }}/{{ disk }}/fio_results_{{ inventory_hostname }}_{{ current_time }}_{{ config.fio_test_name | default('') }}_{{ disk }}.json"
+      when: fio_device_is_expected[disk]
+      loop: "{{ fio_test_disks }}"
+      loop_control:
+        loop_var: disk

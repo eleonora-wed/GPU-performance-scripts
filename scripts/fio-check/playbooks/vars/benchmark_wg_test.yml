@@ -1,0 +1,6 @@
+fio_test_name: "benchmark_wg_test"
+fio_readwrite: "randrw"
+fio_bs: "64k"
+fio_iodepth: 64
+fio_numjobs: 32
+fio_runtime: 120

@@ -1,0 +1,6 @@
+fio_test_name: "benchmark_rw_4k_qd32_j4"
+fio_readwrite: "randwrite"
+fio_bs: "4k"
+fio_iodepth: 32
+fio_numjobs: 4
+fio_runtime: 60

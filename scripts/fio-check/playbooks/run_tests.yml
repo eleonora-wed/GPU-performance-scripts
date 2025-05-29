@@ -1,0 +1,40 @@
+---
+- name: Запуск fio тестов с разными параметрами
+  hosts: all
+  become: true
+
+  vars_files:
+    - vars/common.yml
+
+  vars:
+    fio_test_configs:
+      - "vars/benchmark_rr_4k_qd32_j4.yml"
+      - "vars/benchmark_rw_4k_qd32_j4.yml"
+      - "vars/benchmark_sr_1M_qd32_j4.yml"
+      - "vars/benchmark_sw_1M_qd32_j4.yml"
+      - "vars/benchmark_wg_test.yml"
+
+  pre_tasks:
+    - name: Получить текущее время
+      command: date +%Y%m%d_%H%M%S
+      register: time_output
+      delegate_to: localhost
+      run_once: true
+      become: false
+
+    - name: Установить переменную времени
+      set_fact:
+        current_time: "{{ time_output.stdout }}"
+
+  tasks:
+    - name: Проверка наличия fio на сервере
+      command: which fio
+      register: fio_check
+      ignore_errors: true
+      changed_when: false
+
+    - name: Запуск тестов для каждой конфигурации
+      include_tasks: fio_benchmark.yml
+      loop: "{{ fio_test_configs }}"
+      loop_control:
+        loop_var: config_file
